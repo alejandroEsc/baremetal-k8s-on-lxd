@@ -3,10 +3,14 @@ Here we include tools, at first bash scripts, that can be run to help provision 
 run Kubernetes (K8s). The approach here is to deploy ubuntu 16.04 containers accross an lxd cluster with constraints,
 and have them be consumed by juju as machines that can be used to run kubernetes. 
 
+The intention here is to document what has been done to get to successfull deployment and management of a kubernetes cluster. Work
+to create a cli on golang is the next objective.
+
 # Getting Ready
 We recommended the following setup
 
-- One physical machine that will contain the juju controller, and a remote lxc instance to peek into the cluster. 
+- One physical machine that will contain the juju controller, we will call this the staging node and will allow us to 
+remotely run lxc commands as we need.
 - All physical machines that you will run lxd containers, must run least lxd 3.0.0
 
 Therefore you will have one machine that stages all changes accross your cluster. That same machine could be the maas controller
@@ -27,6 +31,29 @@ sudo snap install lxd
 ```
 
 The last line will install both the client `lxc` and the daemon `lxd`.
+
+## Creating A Staging Node
+To do so select a machine that you would like to stage lxc commands and deployments from. We suggest
+that you use the same machine to run things such as a juju controller or a maas server, though clearly
+not always the best choice for all things to be done.
+
+When done selecting a machine make sure you go through the init process, but select NO to use clustering
+```
+sudo lxd init
+```
+
+when complete run the following [3]
+
+```
+lxc config set core.https_address '[::]'
+```
+
+and then manually add each node
+
+```
+lxc remote add <select-a-name> <ip-address>
+```
+
 
 # Setting up a new LXD node.
 A few tools you may want to install
@@ -95,6 +122,16 @@ iface enp0s25 inet dhcp
 
 where the iface for `enp0s25` was changed from static to dhcp.
 
+## Configure LXD Node
+In order to deploy k8s on the lxd containers a few configurations must be set to the node that will then be inherited
+to each of the containers deployed on that node. If you already ran your containers you can set these configurations to the
+particular container itself after the fact, however, we recommend you just destroy the container and recreate it anyway.
+
+Run the following script from the staging machine to set configurations. Note that this includes additional zfs configs
+tht will allow access of the zfs device from the container, make changes as you require.
+```
+./configure_lxd_node <node-name>
+```
 
 
 # K8s nodes
@@ -176,12 +213,25 @@ On each a service is deployed, for example
     - '1'
 ``` 
 
+# Managing the K8s cluster
+Here we include a few shortcuts to managing a cluster, you can readily find some of these suggestions 
+## Enable RBAC
+```
+juju config kubernetes-master authorization-mode="RBAC,Node"
+```
+
+## Adding worker node
+Adding a worker node is as simple as adding a machine to juju and then deploying `to` that machine
+```
+juju add-unit kubernetes-worker --to <machine-number>
+```
+
 # Destroying k8s
 Here we point out the process of destroying a k8s cluster deployed with juju
 
 ## Manually remove a machine from your model
 ```
-juju destroy-machine <machine number> --force
+juju destroy-machine <machine-number> --force
 ```
 
 ## Manually remove model
@@ -189,3 +239,9 @@ juju destroy-machine <machine number> --force
 juju destroy-model k8s
 ```
 
+# Troubleshooting
+
+# References
+- [1] [Kuberentes Core Bundle](https://jujucharms.com/kubernetes-core/)
+- [2] [RBAC and Helm](https://github.com/kubernetes/helm/blob/master/docs/rbac.md)
+- [3] [Remote host](https://stgraber.org/2016/04/12/lxd-2-0-remote-hosts-and-container-migration-612/)
