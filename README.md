@@ -241,6 +241,38 @@ juju destroy-model k8s
 
 # Troubleshooting
 
+### lxd remote add error
+When on a staging node, you may want to add a remote host. However, when doing so you may find the following error
+```
+Error: Certificate already in trust store
+```
+
+To fix this, you may go to that node, and run 
+```
+lxc config trust list
+```
+
+where you may find
+
+```
++--------------+--------------------------+------------------------------+------------------------------+
+| FINGERPRINT  |       COMMON NAME        |          ISSUE DATE          |         EXPIRY DATE          |
++--------------+--------------------------+------------------------------+------------------------------+
+| bd9ed94f50e1 | ubuntu@maas-controller-2 | May 16, 2018 at 4:20pm (UTC) | May 13, 2028 at 4:20pm (UTC) |
++--------------+--------------------------+------------------------------+------------------------------+
+| ee78s74860d8 | root@nuc2-1              | May 23, 2018 at 3:21pm (UTC) | May 20, 2028 at 3:21pm (UTC) |
++--------------+--------------------------+------------------------------+------------------------------+
+```
+
+Note that the staging noce is `ubuntu@maas-controller-2` and we see here that an entry already exists.
+Simply run 
+
+```
+lxc config trust remove <fingerprint>
+```
+in the case above, the fingerprint would be `bd9ed94f50e1`. You can then try once again to add the remote host
+and it should work.
+
 # References
 - [1] [Kuberentes Core Bundle](https://jujucharms.com/kubernetes-core/)
 - [2] [RBAC and Helm](https://github.com/kubernetes/helm/blob/master/docs/rbac.md)
