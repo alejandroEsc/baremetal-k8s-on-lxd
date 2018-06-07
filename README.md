@@ -241,6 +241,8 @@ juju destroy-model k8s
 
 # Troubleshooting
 
+## LXD/LXC issues
+
 ### lxd remote add error
 When on a staging node, you may want to add a remote host. However, when doing so you may find the following error
 ```
@@ -273,7 +275,53 @@ lxc config trust remove <fingerprint>
 in the case above, the fingerprint would be `bd9ed94f50e1`. You can then try once again to add the remote host
 and it should work.
 
+## helm issues
+
+
+## etcd issues
+
+### New etcd-cluster created, flannel missing key
+So you somehow killed all etcd instances, but managed to deploy a new one, essentially creating a new
+k8s cluster. Flannel complaints that its missing etcd key for networking, run the following to fix: 
+```
+etcd.etcdctl mk /coreos.com/network/config '{"Network":"10.1.0.0/16"}'
+```
+where you should choose a network that doesnt interfere with either docker, or your existing subnet.
+
+### Upon Reboot, etcd will not start because 'permission denied'
+The error can be viewed by looking at the logs
+```
+journalctl -u snap.etcd.etcd
+...
+Jun 07 05:03:07 nuc2-2-ubuntu-2CPU-8GB-1 etcd[1267]: cannot access data directory: mkdir /var/snap/etcd/current: permission denied
+Jun 07 05:03:07 nuc2-2-ubuntu-2CPU-8GB-1 systemd[1]: snap.etcd.etcd.service: Main process exited, code=exited, status=1/FAILURE
+Jun 07 05:03:07 nuc2-2-ubuntu-2CPU-8GB-1 systemd[1]: snap.etcd.etcd.service: Unit entered failed state.
+Jun 07 05:03:07 nuc2-2-ubuntu-2CPU-8GB-1 systemd[1]: snap.etcd.etcd.service: Failed with result 'exit-code'.
+...
+```
+if you investigate the directory structure you will see that group and user accounts are correct. Check the snap interfaces
+
+```
+snap interfaces | grep etcd
+  :home                      cdk-addons,etcd,kube-apiserver,kube-controller-manager,kube-scheduler
+  :network-bind              etcd,kube-apiserver,kube-controller-manager,kube-scheduler
+  -                          etcd:removable-media
+```
+the problem is the last line, it essentialy etcd is not plugged in and so has no access to memory
+
+```
+sudo snap connect etcd:removable-media core:removable-media
+```
+
+should now connect and have access to memory, restart the service
+```
+sudo systemctl restart snap.etcd.etcd.service 
+```
+and we should be back.
+
+
 # References
 - [1] [Kuberentes Core Bundle](https://jujucharms.com/kubernetes-core/)
 - [2] [RBAC and Helm](https://github.com/kubernetes/helm/blob/master/docs/rbac.md)
 - [3] [Remote host](https://stgraber.org/2016/04/12/lxd-2-0-remote-hosts-and-container-migration-612/)
+- [4] [LXD Brideging](https://blog.simos.info/how-to-make-your-lxd-containers-get-ip-addresses-from-your-lan-using-a-bridge/)
