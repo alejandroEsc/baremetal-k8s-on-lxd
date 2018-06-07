@@ -325,3 +325,4 @@ and we should be back.
 - [2] [RBAC and Helm](https://github.com/kubernetes/helm/blob/master/docs/rbac.md)
 - [3] [Remote host](https://stgraber.org/2016/04/12/lxd-2-0-remote-hosts-and-container-migration-612/)
 - [4] [LXD Brideging](https://blog.simos.info/how-to-make-your-lxd-containers-get-ip-addresses-from-your-lan-using-a-bridge/)
+- [5] [Snap Interfaces](https://docs.snapcraft.io/core/interfaces)
