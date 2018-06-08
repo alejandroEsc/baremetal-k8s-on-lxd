@@ -1,7 +1,10 @@
 #!/bin/bash
 
+# adding hostname to /etc/hosts
+echo "Adding $(hostname) to /etc/hosts file"
+echo "127.0.0.1 $(hostname)" >> /etc/hosts
 
-#Install docker
+# Install docker
 echo "Installing docker...."
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo -S apt-key add -
 #sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 7EA0A9C3F273FCD8
@@ -19,3 +22,7 @@ echo
 echo "installing zfs utils..."
 apt install zfs -y
 echo "... done installing zfs utils"
+echo
+echo "installing dnsmasq utils..."
+apt install dnsmasq -y
+echo "... done installing dnsmasq utils"
