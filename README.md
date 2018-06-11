@@ -275,6 +275,48 @@ lxc config trust remove <fingerprint>
 in the case above, the fingerprint would be `bd9ed94f50e1`. You can then try once again to add the remote host
 and it should work.
 
+### Cannot contact any lxc/lxd server in the cluster 
+Several issues can cause this problem, we will try to organize the issues as we come upon them. The most common
+symptom is
+
+```
+lxc list
+Error: Get http://unix.socket/1.0: dial unix /var/snap/lxd/common/lxd/unix.socket: connect: no such file or directory
+```
+
+We recommend that you run the follow list of commands to determine the actual cause
+
+```
+sudo systemctl status snap.lxd.daemon
+```
+
+```
+journalctl -u snap.lxd.daemon
+```
+
+We now review a few example cases of issues.
+
+#### Error: failed to open cluster database: failed to ensure schema: failed to begin transaction: cannot start a transaction within a transaction
+For this error none of the nodes in the cluster would come up, each would mention the above issue. The
+resolution was to perform the following in each node:
+
+```
+sudo systemctl stop lxd lxd.socket
+sudo pkill lxd
+sudo lxd --debug --group lxd
+```
+
+This essentially restarts lxd on each of the nodes, and allows them to make contact with each other and start processing. The
+last line in particularly was important. Once the nodes are talking to each other, then turn off each of
+the processes in the following order
+
+```
+ctrl-c
+sudo systemctl restart snap.lxd.daemon
+```
+Do so one at a time on each machine. LXD will now be running. Its unclear what exactly got us to this
+state but it did.
+
 ## helm issues
 
 
@@ -319,6 +361,27 @@ sudo systemctl restart snap.etcd.etcd.service
 ```
 and we should be back.
 
+### Upon reboot, etcd will not start up due to: snap-update-ns failed with code 1
+The full error looks like
+
+```
+cannot change profile for the next exec call: No such file or directory
+snap-update-ns failed with code 1
+```
+whenever you try to run etcd
+
+```
+Jun  8 18:54:07 nuc2-2-ubuntu-2cpu-8gb-1 kernel: [  681.751079] audit: type=1400 audit(1528484047.174:778): apparmor="DENIED" operation="change_onexec" info="label not found" error=-2 profile="/usr/lib/snapd/snap-confine" name="snap-update-ns.etcd" pid=20827 comm="snap-confine"
+Jun  8 18:54:09 nuc2-2-ubuntu-2cpu-8gb-1 kernel: [  683.598811] audit: type=1400 audit(1528484049.022:779): apparmor="DENIED" operation="change_onexec" info="label not found" error=-2 profile="/usr/lib/snapd/snap-confine" name="snap-update-ns.etcd" pid=21000 comm="snap-confine"
+```
+
+The issues is actually app-armor and profiles
+
+
+
+```
+sudo apparmor_parser /var/lib/snapd/apparmor/profiles/*
+```
 
 # References
 - [1] [Kuberentes Core Bundle](https://jujucharms.com/kubernetes-core/)
