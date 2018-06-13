@@ -20,7 +20,7 @@ apt install conntrack
 echo "... done installing conntrack"
 echo
 echo "installing zfs utils..."
-apt install zfs -y
+apt install zfsutils-linux -y
 echo "... done installing zfs utils"
 echo
 echo "installing dnsmasq utils..."
