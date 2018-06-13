@@ -45,7 +45,7 @@ sudo lxd init
 when complete run the following [3]
 
 ```
-lxc config set core.https_address '[::]'
+lxc config set core.https_address '[::]:8443'
 ```
 
 and then manually add each node
