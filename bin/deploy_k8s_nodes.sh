@@ -6,17 +6,29 @@ pub_key_file=$3
 script_file=$4
 storage=$5
 
+function upgrade_container(){
+	machine=$1
+	container_name=$2
+
+	echo
+    echo "lxc exec ${member_name}:${container_name} -- apt update"
+    lxc exec ${member_name}:${container_name} -- apt update
+    echo "lxc exec ${member_name}:${container_name} -- apt upgrade -y"
+    lxc exec ${member_name}:${container_name} -- apt upgrade -y
+    echo "lxc exec ${member_name}:${container_name} -- apt autoremove -y"
+    lxc exec ${member_name}:${container_name} -- apt autoremove -y
+	echo "...done."
+}
+
 function delete_container(){
 	machine=$1
 	container_name=$2
-	limit_cpu=$3
-	limit_memory=$4
 
 	echo
 	echo "deleting ${machine}:${machine}-${container_name}..."
 	lxc stop  ${machine}:${machine}-${container_name}
 	lxc delete --force ${machine}:${machine}-${container_name}
-	echo "...done"
+	echo "...done."
 }
 
 function create_container(){
@@ -49,7 +61,7 @@ function create_container(){
 	lxc exec ${machine}:${machine}-${container_name} -- chown root:root .ssh/authorized_keys
 	lxc exec ${machine}:${machine}-${container_name} -- chmod 600 .ssh/authorized_keys
 	lxc exec ${machine}:${machine}-${container_name} -- bash ${script_file}
-	echo "...done"
+	echo "...done."
 
 	# reboot
 	echo "reboot"
@@ -67,3 +79,7 @@ if [ "${action}" = "destroy" ]; then
   delete_container ${machine} ubuntu-2CPU-8GB-2 2 8GB
 fi
 
+if [ "${action}" = "destroy" ]; then
+  upgrade_container ${machine} ubuntu-2CPU-8GB-1
+  upgrade_container ${machine} ubuntu-2CPU-8GB-2
+fi
