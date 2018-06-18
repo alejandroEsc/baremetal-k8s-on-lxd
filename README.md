@@ -256,3 +256,4 @@ juju destroy-model k8s
 - [6] [Maas LXD Integration](https://github.com/lxc/lxd/blob/master/doc/containers.md)
 - [7] [LXD v3 configure for k8s deployment](https://github.com/juju-solutions/bundle-canonical-kubernetes/wiki/Deploying-on-LXD)
 - [8] [LXD, ZFS and bridged networking on Ubuntu 16.04 LTS+](https://bayton.org/docs/linux/lxd/lxd-zfs-and-bridged-networking-on-ubuntu-16-04-lts/)
+- [9] [Local persistent volumes beta](https://kubernetes.io/blog/2018/04/13/local-persistent-volumes-beta/)

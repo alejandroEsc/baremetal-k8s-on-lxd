@@ -141,3 +141,5 @@ The issues is actually app-armor and profiles
 ```
 sudo apparmor_parser /var/lib/snapd/apparmor/profiles/*
 ```
+
+
