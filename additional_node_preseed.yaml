@@ -1,0 +1,24 @@
+config:
+  core.https_address: <address_>:8443
+cluster:
+  server_name: <server_name>
+  enabled: true
+  cluster_address: <cluster_address>:8443
+  cluster_certificate: |
+    -----BEGIN CERTIFICATE-----
+   <certificate>
+    -----END CERTIFICATE-----
+  cluster_password: <cluster_password>
+networks: []
+storage_pools:
+- config:
+    size: 100GB
+    source: ""
+  description: ""
+  name: local
+  driver: zfs
+profiles:
+- config: {}
+  description: ""
+  devices: {}
+  name: default

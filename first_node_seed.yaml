@@ -1,0 +1,30 @@
+config:
+  core.https_address: <ip_address>:8443
+  core.trust_password: <cluster_pass>
+cluster:
+  server_name: <server_name>
+  enabled: true
+  cluster_address: ""
+  cluster_certificate: ""
+  cluster_password: ""
+networks: []
+storage_pools:
+- config:
+    size: 100GB
+  description: ""
+  name: local
+  driver: zfs
+profiles:
+- config: {}
+  description: ""
+  devices:
+    eth0:
+      name: eth0
+      nictype: bridged
+      parent: br0
+      type: nic
+    root:
+      path: /
+      pool: local
+      type: disk
+  name: default
