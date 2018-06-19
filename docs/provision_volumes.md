@@ -19,7 +19,7 @@ juju config kubernetes-master controller-manager-extra-args="feature-gates=Persi
 ```
 
 ```
-juju config kubernetes-worker kubelet-extra-args="feature-gates=BlockVolume=true"
+juju config kubernetes-worker kubelet-extra-args="feature-gates=PersistentLocalVolumes=true,MountPropagation=true,VolumeScheduling=true""
 ```
 # Example 
 
@@ -100,6 +100,38 @@ spec:
       - nuc-ae-c-ubuntu-2CPU-8GB-4
 
 ``` 
+What you will notice when you create the pvc is that the claim will remain pending, even if a volume
+is available that meets its requirements, this is because we have the storage class condition for volume
+binding mode being `volumeBindingMode: WaitForFirstConsumer` which means that binding will not occur
+until a pod exists that will reference the claim itself, e.g.,
+
+```
+kind: Pod
+apiVersion: v1
+metadata:
+  name: task-pv-pod
+spec:
+  volumes:
+    - name: task-pv-storage
+      persistentVolumeClaim:
+       claimName: example-local-claim
+  containers:
+    - name: task-pv-container
+      image: nginx
+      ports:
+        - containerPort: 80
+          name: "http-server"
+      volumeMounts:
+        - mountPath: "/usr/share/nginx/html"
+          name: task-pv-storage
+```
+
+The reason for such a necessity is [14]:
+
+
+"Delaying volume binding ensures that the PersistentVolumeClaim binding decision will also be evaluated with any 
+other node constraints the Pod may have, such as node resource requirements, node selectors, Pod affinity, and Pod 
+anti-affinity."
 
 ## Primarily using juju
 

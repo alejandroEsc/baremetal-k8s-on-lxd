@@ -8,7 +8,6 @@ to create a cli on golang is the next objective.
 
 # Table of Contents
 
-
 - [Troubleshooting](docs/troubleshooting.md)
 - [Provisioning Local Volumes](docs/provision_volumes.md)
 
@@ -258,3 +257,7 @@ juju destroy-model k8s
 - [8]  [LXD, ZFS and bridged networking on Ubuntu 16.04 LTS+](https://bayton.org/docs/linux/lxd/lxd-zfs-and-bridged-networking-on-ubuntu-16-04-lts/)
 - [9]  [Local Persistent Storage Example CDK on LXC](https://github.com/juju-solutions/bundle-canonical-kubernetes/wiki/Local-Persistent-Storage-Example)
 - [10] [Local persistent volumes beta](https://kubernetes.io/blog/2018/04/13/local-persistent-volumes-beta/)
+- [11] [K8s Volumes](https://kubernetes.io/docs/concepts/storage/volumes/)
+- [12] [kubernetes-incubator/external-storage](https://github.com/kubernetes-incubator/external-storage/tree/master/local-volume#enabling-the-alpha-feature-gates)
+- [13] [Local-Persistent-Storage-Example](https://github.com/juju-solutions/bundle-canonical-kubernetes/wiki/Local-Persistent-Storage-Example)
+- [14] [Configure a Pod to Use a PersistentVolume for Storage](https://kubernetes.io/docs/tasks/configure-pod-container/configure-persistent-volume-storage/)
